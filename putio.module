@@ -1,0 +1,123 @@
+<?php
+module_load_include('php', 'oauth_common', 'lib/OAuth');
+
+/**
+ * Implements hook_menu().
+ */
+function putio_menu() {
+  $items = array();
+
+  $items['admin/config/services/putio'] = array(
+    'title' => 'Put.io settings',
+    'description' => 'Oauth settings for put.io API integration',
+    'access callback' => 'user_access',
+    'access arguments' => array('putio'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('putio_settings_form'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['putio/callback'] = array(
+    'title' => 'Title',
+    'description' => 'Description',
+    'access callback' => 'user_access',
+    'access arguments' => array('putio'),
+    'page callback' => 'putio_callbackurl',
+    'page arguments' => array(),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Settings form. It gets the settings from put.io app, and
+ * offers a link for the user to click and get its access token.
+ */
+function putio_settings_form() {
+  $form = array();
+  // Checking if we already got a token.
+  $access_token = variable_get('putio_access_token', '');
+  // Getting value for all settings for a put.io app.
+  $client_id = variable_get('putio_client_id', '');
+  $client_secret = variable_get('putio_client_secret', '');
+  $callback_url =  urlencode(variable_get('putio_callback_url', ''));
+
+  // If not, let's get one. Print a link for the user to go there. But only if we already got:
+  // client_id, client_secret and callback_url
+  if (!$access_token
+    && !empty($client_id)
+    && !empty($client_secret)
+    && !empty($callback_url)
+  ) {
+    $url = "https://api.put.io/v2/oauth2/authenticate?client_id=" . $client_id . "&response_type=code&redirect_uri=" . $callback_url;
+    $form['new_access_token_link'] = array(
+      '#theme' => 'link',
+      '#text' => t('Authorize this app on put.io'),
+      '#path' => $url,
+      '#options' => array(
+        'absolute' => TRUE,
+        'attributes' => array(),
+        'html' => FALSE,
+      ),
+    );
+  }
+
+  else {
+    $form['access_token'] = array(
+      '#type' => 'textfield',
+      '#value' => $access_token,
+      '#title' => t('Access token'),
+      '#disabled' => TRUE,
+      '#description' => t('Access token provided by Put.io connection. You\'re not supposed to modify this'),
+    );
+
+  }
+
+  $form['putio_client_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Client ID'),
+    '#default_value' => variable_get('putio_client_id', ''),
+  );
+
+  $form['putio_client_secret'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Client Secret'),
+    '#default_value' => variable_get('putio_client_secret', ''),
+  );
+
+  $form['putio_callback_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Callback URL'),
+    '#default_value' => variable_get('putio_callback_url', ''),
+  );
+  
+  return system_settings_form($form);
+
+}
+
+// callback url. Gets the code, and asks for a access_token.
+function putio_callbackurl(){
+  $client_id = variable_get('putio_client_id', '');
+  $client_secret = variable_get('putio_client_secret', '');
+  $callback_url =  urlencode(variable_get('putio_callback_url', ''));
+
+  $params = drupal_get_query_parameters();
+  if (!empty($params['code'])) {
+    $code = $params['code'];
+    $url = "https://api.put.io/v2/oauth2/access_token?client_id=" . $client_id .
+    "&client_secret=" . $client_secret .
+    "&grant_type=authorization_code&redirect_uri=" . $callback_url .
+    "&code=" . $code;
+    $result = drupal_http_request($url);
+    if ($result->code == 200) {
+      $data = json_decode($result->data);
+      if (isset($data->access_token)) {
+        $access_token = $data->access_token;
+        variable_set('putio_access_token', $access_token);
+        drupal_set_message(t('Access token was saved successfully. You can start using Put.io API'));
+        drupal_goto('admin/config/services/putio');
+      }
+    }
+  }
+}
