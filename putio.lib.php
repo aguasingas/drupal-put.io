@@ -11,16 +11,16 @@ namespace {
      * @param array $parameters
      * @return array
      */
-    function addAccessToken($parameters = array()) {
+    function add_access_token($parameters = array()) {
       $access_token = variable_get('putio_access_token', '');
       $parameters['oauth_token'] = $access_token;
       return $parameters;
     }
 
 
-    function doRequest($query, $parameters = array()){
+    function do_request($query, $parameters = array()){
       $url = $this->baseUrl . $query;
-      $parameters = $this->addAccessToken($parameters);
+      $parameters = $this->add_access_token($parameters);
       $url = url($url, array('query' => $parameters, 'absolute' => TRUE));
       $result = drupal_http_request($url);
 
@@ -31,18 +31,18 @@ namespace {
       return null;
     }
 
-    function getFilesList($parent_id = 0){
+    function get_files_list($parent_id = 0){
       $query = "files/list";
       $parameters = array(
         'parent_id' => $parent_id,
       );
-      $data = $this->doRequest($query, $parameters);
-      if ($this->requestIsOK($data)) {
+      $data = $this->do_request($query, $parameters);
+      if ($this->request_is_ok($data)) {
         return $data->files;
       }
     }
 
-    function getFilesSearch($search_query = '', $operators = array()){
+    function get_files_search($search_query = '', $operators = array()){
       $query = "files/list";
       if (!empty($operators)) {
         $operators_string = '';
@@ -58,7 +58,7 @@ namespace {
           }
         }
       }
-      $result = $this->doRequest('files/search/' . $search_query);
+      $result = $this->do_request('files/search/' . $search_query);
       $output = array();
       if (!empty($result->files)) {
         foreach ($result->files as $file) {
@@ -68,7 +68,7 @@ namespace {
       return $output;
     }
 
-    function requestIsOK($data) {
+    function request_is_ok($data) {
       return $data->status == 'OK';
     }
   }
