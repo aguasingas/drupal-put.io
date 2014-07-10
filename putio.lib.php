@@ -6,6 +6,17 @@ namespace {
 
     protected $baseUrl = "https://api.put.io/v2/";
 
+    private static $instance;
+
+    private function __construct() { }
+
+    public static function get_instance() {
+      if ( empty( self::$instance ) ) {
+        self::$instance = new \Putio();
+      }
+      return self::$instance;
+    }
+
     /**
      * Adds access token to request parameters.
      * @param array $parameters
