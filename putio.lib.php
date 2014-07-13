@@ -135,7 +135,53 @@ namespace Putio {
         return $data;
       }
     }
+
+    /**
+     * Gets mp4 conversion status.
+     *
+     * @return object with properties:
+     *  size - Size of the mp4 version
+     *  status - status for the mp4 conversion
+     *
+     * @see https://put.io/v2/docs/files.html#get-mp4-status
+     */
+    function get_mp4_status() {
+      $query = format_string("files/@id/mp4", array('@id' => $this->id));
+      $data = $this->do_request($query);
+      // turns string constants into numeric constant defined in mp4_status class.
+      if (!empty($data->mp4)){
+        switch ($data->mp4->status) {
+          case 'NOT_AVAILABLE':
+            $data->mp4->status = mp4_status::NOT_AVAILABLE;
+            break;
+          case 'IN_QUEUE':
+            $data->mp4->status = mp4_status::IN_QUEUE;
+            break;
+          case 'CONVERTING':
+            $data->mp4->status = mp4_status::CONVERTING;
+            break;
+          case 'COMPLETED':
+            $data->mp4->status = mp4_status::COMPLETED;
+            break;
+        }
+        return $data->mp4;
+      }
+    }
+  }
+
+  /**
+   * Class mp4_status
+   * @package Putio
+   *
+   * Includes constants for mp4-related status for files.
+   */
+  class mp4_status {
+    const NOT_AVAILABLE = 0;
+    const IN_QUEUE = 1;
+    const CONVERTING = 2;
+    const COMPLETED = 3;
   }
 }
+
 
 
