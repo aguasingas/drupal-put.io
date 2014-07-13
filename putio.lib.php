@@ -229,6 +229,20 @@ namespace Putio {
       $result = $this->do_request($query, $parameters);
     }
 
+    /**
+     * Moves a file to another parent folde.
+     *
+     * @param $parent_id: Id for the parent folder
+     */
+    function move($parent_id) {
+      $query = "files/move";
+      $parameters = array(
+        'method' => 'POST',
+        'file_ids' => $this->id,
+        'parent_id' => $parent_id,
+      );
+      $result = $this->do_request($query, $parameters);
+    }
   }
 
   /**
