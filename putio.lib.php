@@ -28,8 +28,52 @@ namespace {
       return $parameters;
     }
 
+    /**
+     * Performs a POST request to Put.io
+     *
+     * @param $query
+     * @param array $parameters
+     * @return mixed|null|string
+     */
+    function post_request($query, $parameters = array()) {
+      // Append query to Put.io domain so we point to the right endpoint.
+      $url = $this->baseUrl . $query;
+      $parameters = $this->add_access_token($parameters);
 
+      // turns the parameter array into a url-encoded, &-linked string of key-value pairs.
+      $data = drupal_http_build_query($parameters);
+      $options = array(
+        'method' => 'POST',
+        'data' => $data,
+        'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+      );
+      // actual request
+      $result = drupal_http_request($url, $options);
+      // test if it has been successful
+      if ($result->code == 200) {
+        $data = json_decode($result->data);
+        return $data;
+      }
+      return null;
+    }
+
+    /**
+     * Does a request to the Put.io API
+     * If it's a POST one, it delegates to post_request.
+     *
+     * @param $query
+     * @param array $parameters
+     * @return mixed|null|string
+     */
     function do_request($query, $parameters = array()){
+      // POST requests are processed in a different function!
+      if (!empty($parameters['method']) && $parameters['method'] == 'POST') {
+        // "method" parameter is only used internally to delegate to POST function,
+        // so we can delete it before calling it.
+        unset($parameters['method']);
+        return $this->post_request($query, $parameters);
+      }
+      // Append query to Put.io domain.
       $url = $this->baseUrl . $query;
       $parameters = $this->add_access_token($parameters);
       $url = url($url, array('query' => $parameters, 'absolute' => TRUE));
