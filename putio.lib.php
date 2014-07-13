@@ -211,6 +211,24 @@ namespace Putio {
         return $data->mp4;
       }
     }
+
+    /**
+     * Renames current file.
+     * @param $new_name: New name for current file.
+     *
+     * @see: https://put.io/v2/docs/files.html#rename
+     */
+    function rename($new_name) {
+      $new_name = check_plain($new_name);
+      $query = "files/rename";
+      $parameters = array(
+        'method' => 'POST',
+        'file_id' => $this->id,
+        'name' => $new_name,
+      );
+      $result = $this->do_request($query, $parameters);
+    }
+
   }
 
   /**
