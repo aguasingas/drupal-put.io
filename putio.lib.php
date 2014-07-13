@@ -127,6 +127,14 @@ namespace Putio {
         return $this->$var;
       }
     }
+
+    function do_request($query, $parameters = array()) {
+      $putio = \Putio::get_instance();
+      $data = $putio->do_request($query, $parameters);
+      if ($putio->request_is_ok($data)) {
+        return $data;
+      }
+    }
   }
 }
 
