@@ -245,6 +245,22 @@ namespace Putio {
     }
   }
 
+class File_set  {
+  protected $files;
+  function __construct($files){
+    $this->populate($files);
+  }
+  /**
+   * Populates from an array of files coming from Put.io api.
+   *
+   * @param $files
+   */
+  function populate($files) {
+    foreach ($files as $file) {
+      $this->files[] = new File($file);
+    }
+  }
+}
   /**
    * Class mp4_status
    * @package Putio
