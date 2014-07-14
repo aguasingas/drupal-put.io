@@ -269,7 +269,87 @@ class File_set  {
     const CONVERTING = 2;
     const COMPLETED = 3;
   }
-}
+  class Transfer extends Can_request {
+    protected $id;
+    protected $name;
+    protected $file_id;
+    protected $availability;
+    protected $callback_url;
+    protected $created_at;
+    protected $created_torrent;
+    protected $current_ratio;
+    protected $down_speed;
+    protected $downloaded;
+    protected $error_message;
+    protected $estimated_time;
+    protected $extract;
+    protected $finished_at;
+    protected $is_private;
+    protected $magneturi;
+    protected $peers_connected;
+    protected $peers_getting_from_us;
+    protected $percent_done;
+    protected $save_parent_id;
+    protected $seconds_seeding;
+    protected $size;
+    protected $source;
+    protected $status;
+    protected $status_message;
+    protected $subscription_id;
+    protected $torrent_link;
+    protected $tracker_message;
+    protected $trackers;
+    protected $type;
+    protected $up_speed;
+    protected $uploaded;
+
+    function __construct($transfer) {
+      $this->id = $transfer->id;
+      $this->name = $transfer->name;
+      $this->file_id = $transfer->file_id;
+      $this->availability = $transfer->availability;
+      $this->callback_url = $transfer->callback_url;
+      $this->created_at = $transfer->created_at;
+      $this->created_torrent = $transfer->created_torrent;
+      $this->current_ratio = $transfer->current_ratio;
+      $this->down_speed = $transfer->down_speed;
+      $this->downloaded = $transfer->downloaded;
+      $this->error_message = $transfer->error_message;
+      $this->estimated_time = $transfer->estimated_time;
+      $this->extract = $transfer->extract;
+      $this->finished_at = $transfer->finished_at;
+      $this->is_private = $transfer->is_private;
+      $this->magneturi = $transfer->magneturi;
+      $this->peers_connected = $transfer->peers_connected;
+      $this->peers_getting_from_us = $transfer->peers_getting_from_us;
+      $this->percent_done = $transfer->percent_done;
+      $this->save_parent_id = $transfer->save_parent_id;
+      $this->seconds_seeding = $transfer->seconds_seeding;
+      $this->size = $transfer->size;
+      $this->source = $transfer->source;
+      $this->status = $transfer->status;
+      $this->status_message = $transfer->status_message;
+      $this->subscription_id = $transfer->subscription_id;
+      $this->torrent_link = $transfer->torrent_link;
+      $this->tracker_message = $transfer->tracker_message;
+      $this->trackers = $transfer->trackers;
+      $this->type = $transfer->type;
+      $this->up_speed = $transfer->up_speed;
+      $this->uploaded = $transfer->uploaded;
+    }
+
+    static function get_list() {
+      $query = 'transfers/list';
+      $data = self::do_request($query);
+      $output = array();
+      if (!empty($data->transfers)) {
+        foreach ($data->transfers as $transfer) {
+          $output[] = new Transfer($transfer);
+        }
+      }
+      return $output;
+    }
+  }
 
   abstract class Can_request {
     function do_request($query, $parameters = array()) {
