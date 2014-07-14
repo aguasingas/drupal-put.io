@@ -129,7 +129,7 @@ namespace {
   }
 }
 namespace Putio {
-  class File {
+  class File extends Can_request {
 
     protected $id;
     protected $name;
@@ -172,11 +172,6 @@ namespace Putio {
       }
     }
 
-    function do_request($query, $parameters = array()) {
-      $putio = \Putio::get_instance();
-      $data = $putio->do_request($query, $parameters);
-      if ($putio->request_is_ok($data)) {
-        return $data;
       }
     }
 
@@ -275,5 +270,12 @@ class File_set  {
   }
 }
 
+  abstract class Can_request {
+    function do_request($query, $parameters = array()) {
+      $putio = \Putio::get_instance();
+      return $putio->do_request($query, $parameters);
+    }
+  }
+}
 
 
