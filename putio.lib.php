@@ -1,6 +1,5 @@
 <?php
 namespace {
-  use Putio\File;
 
   class Putio {
 
@@ -86,43 +85,6 @@ namespace {
       return null;
     }
 
-    function get_files_list($parent_id = 0){
-      $query = "files/list";
-      $parameters = array(
-        'parent_id' => $parent_id,
-      );
-      $data = $this->do_request($query, $parameters);
-      if ($this->request_is_ok($data)) {
-        return $data->files;
-      }
-    }
-
-    function get_files_search($search_query = '', $operators = array()){
-      $query = "files/list";
-      if (!empty($operators)) {
-        $operators_string = '';
-        $default_operators = array("from","type","ext","time");
-        foreach ($operators as $key => $value) {
-          // Remove non-valid operators.
-          if (!in_array($key, $default_operators)) {
-            unset($operators[$key]);
-          }
-          // if it's valid, add it to the query.
-          else {
-            $search_query  .= ' ' . $key . ':' . $value;
-          }
-        }
-      }
-      $result = $this->do_request('files/search/' . $search_query);
-      $output = array();
-      if (!empty($result->files)) {
-        foreach ($result->files as $file) {
-          $output[] = new File($file);
-        }
-      }
-      return $output;
-    }
-
     function request_is_ok($data) {
       return $data->status == 'OK';
     }
@@ -172,8 +134,47 @@ namespace Putio {
       }
     }
 
+    /**
+     * Gets the contents from a folder.
+     *
+     * @param int $parent_id if for parent folder, defaults to home folder.
+     * @return File_set
+     */
+    static function get_list($parent_id = 0){
+      $query = "files/list";
+      $parameters = array(
+        'parent_id' => $parent_id,
+      );
+      $data = self::do_request($query, $parameters);
+      if (!empty($data->files)) {
+        return new File_set($data->files);
       }
     }
+
+    static function search($search_query = '', $operators = array()) {
+      $query = 'files/search/';
+      if (!empty($operators)) {
+        $operators_string = '';
+        $default_operators = array("from", "type", "ext", "time");
+        foreach ($operators as $key => $value) {
+          // Remove non-valid operators.
+          if (!in_array($key, $default_operators)) {
+            unset($operators[$key]);
+          }
+          // if it's valid, add it to the query.
+          else {
+            $search_query .= ' ' . $key . ':' . $value;
+          }
+        }
+      }
+      $data = self::do_request($query . $search_query);
+      $output = array();
+      if (!empty($data->files)) {
+        return new File_set($data->files);
+      }
+      return $output;
+    }
+
 
     /**
      * Gets mp4 conversion status.
