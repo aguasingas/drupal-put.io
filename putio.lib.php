@@ -225,6 +225,25 @@ namespace Putio {
       $result = $this->do_request($query, $parameters);
     }
 
+
+    // still not working: timeout
+    function download() {
+      $query = format_string("files/@id/download", array('@id' => $this->id));
+      $data = $this->do_request($query);
+    }
+
+    function subtitles() {
+      $query = format_string("files/@id/subtitles", array('@id' => $this->id));
+      return $this->do_request($query);
+    }
+
+    // still not woking: timeout
+    function subtitles_download($key = 'default') {
+      $query = format_string("files/@id/subtitles/@key",
+        array('@id' => $this->id, '@key' => $key));
+      return $this->do_request($query);
+    }
+
     /**
      * Moves a file to another parent folde.
      *
